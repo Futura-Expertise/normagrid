@@ -5,15 +5,18 @@
  *
  * Cote reseau, il parle a l'API REST generique exposee par le serveur Flask
  * (backend/routes/api.py) : GET/PUT/PATCH/DELETE sur /api/doc/<collection>/<id>
- * et GET sur /api/collection/<nom>. Le "temps reel" de Firestore est simule
- * par un polling toutes les 2 secondes (aucune modification n'est perdue,
- * seulement affichee avec un leger delai — suffisant pour un usage
- * mono-poste ou petit reseau local de bureau).
+ * et GET sur /api/collection/<nom>. Le "temps reel" de Firestore est assure
+ * (V4.2) par un flux Server-Sent Events GET /api/events : le serveur n'envoie
+ * un message que lorsqu'une donnee a ete modifiee en base, et le navigateur
+ * ne recharge alors que les collections citees. Aucune requete periodique
+ * tant que rien ne change. Si le flux est indisponible (proxy qui le coupe,
+ * navigateur ancien), repli automatique sur un rafraichissement toutes les
+ * 5 s, uniquement pendant la coupure.
  */
 (function () {
   'use strict';
 
-  var POLL_MS = 2000;
+  var FALLBACK_MS = 5000, DEBOUNCE_MS = 120;
 
   function request(method, url, body) {
     var opts = { method: method, headers: {} };
@@ -64,14 +67,89 @@
     });
   };
 
-  CollectionRef.prototype.onSnapshot = function (onNext, onError) {
-    var path = this.path;
-    var stopped = false;
-    var lastJSON = null;
+  /* -------------------- Flux de modifications (SSE) -------------------- */
+  var subs = [], es = null, esOpen = false, readyWaiters = [], fallbackTimer = null;
 
-    function poll() {
-      if (stopped) return;
-      request('GET', '/api/collection/' + path).then(function (list) {
+  function refetch(sub, delay) {
+    if (sub.stopped) return;
+    if (sub.timer) clearTimeout(sub.timer);
+    sub.timer = setTimeout(function () {
+      sub.timer = null;
+      if (sub.stopped) return;
+      if (sub.busy) { sub.again = true; return; }
+      sub.busy = true;
+      sub.fetch().then(function () {}, function () {}).then(function () {
+        sub.busy = false;
+        if (sub.again) { sub.again = false; refetch(sub, 0); }
+      });
+    }, delay === undefined ? DEBOUNCE_MS : delay);
+  }
+  function refetchAll() { subs.slice().forEach(function (s) { refetch(s, 0); }); }
+
+  function startFallback() {
+    if (fallbackTimer || !subs.length) return;
+    fallbackTimer = setInterval(function () { if (!esOpen) refetchAll(); }, FALLBACK_MS);
+  }
+  function stopFallback() { if (fallbackTimer) { clearInterval(fallbackTimer); fallbackTimer = null; } }
+  function flushReady() { var w = readyWaiters; readyWaiters = []; w.forEach(function (f) { f(); }); }
+
+  function ensureStream() {
+    if (!window.EventSource) { startFallback(); return; }
+    if (es && es.readyState !== 2) return;
+    var premiere = !es;
+    es = new EventSource('/api/events');
+    es.onopen = function () {
+      var rouvert = !esOpen && !premiere;
+      esOpen = true; stopFallback();
+      if (rouvert) refetchAll();       /* rattrape ce qui a pu changer pendant la coupure */
+      premiere = false;
+      flushReady();
+    };
+    es.onmessage = function (ev) {
+      var d = null;
+      try { d = JSON.parse(ev.data); } catch (e) { return; }
+      if (!d) return;
+      subs.slice().forEach(function (s) {
+        if (d.all || (d.c && d.c.indexOf(s.coll) >= 0)) refetch(s);
+      });
+    };
+    es.onerror = function () {
+      esOpen = false;
+      startFallback();   /* pendant la coupure seulement ; 401 -> remonte par les requetes de repli */
+      if (es && es.readyState === 2) setTimeout(function () { if (subs.length) ensureStream(); }, FALLBACK_MS);
+    };
+  }
+  /* promesse resolue des que le flux est ouvert (ou apres 1,5 s au plus) : les premiers
+     chargements n'ont lieu qu'apres l'inscription au flux, donc aucune modification n'est ratee. */
+  function whenStreamReady() {
+    ensureStream();
+    return new Promise(function (resolve) {
+      if (esOpen || !window.EventSource) { resolve(); return; }
+      var done = false, f = function () { if (!done) { done = true; resolve(); } };
+      readyWaiters.push(f); setTimeout(f, 1500);
+    });
+  }
+  function closeStreamIfIdle() {
+    if (subs.length) return;
+    stopFallback();
+    if (es) { es.onopen = es.onmessage = es.onerror = null; es.close(); es = null; esOpen = false; }
+  }
+  function addSub(coll, fetchFn) {
+    var sub = { coll: coll, fetch: fetchFn, stopped: false, busy: false, again: false, timer: null };
+    subs.push(sub);
+    whenStreamReady().then(function () { refetch(sub, 0); });
+    return function unsubscribe() {
+      sub.stopped = true;
+      if (sub.timer) clearTimeout(sub.timer);
+      var i = subs.indexOf(sub); if (i >= 0) subs.splice(i, 1);
+      closeStreamIfIdle();
+    };
+  }
+
+  CollectionRef.prototype.onSnapshot = function (onNext, onError) {
+    var path = this.path, lastJSON = null;
+    return addSub(path, function () {
+      return request('GET', '/api/collection/' + path).then(function (list) {
         var json = JSON.stringify(list);
         if (json !== lastJSON) {
           lastJSON = json;
@@ -84,12 +162,8 @@
         }
       }).catch(function (err) {
         if (onError) onError(err);
-      }).then(function () {
-        if (!stopped) setTimeout(poll, POLL_MS);
       });
-    }
-    poll();
-    return function unsubscribe() { stopped = true; };
+    });
   };
 
   /* -------------------- DocumentReference -------------------- */
@@ -122,13 +196,9 @@
   };
 
   DocRef.prototype.onSnapshot = function (onNext, onError) {
-    var path = this.path;
-    var stopped = false;
-    var lastJSON = null;
-
-    function poll() {
-      if (stopped) return;
-      request('GET', '/api/doc/' + path).then(function (res) {
+    var path = this.path, lastJSON = null;
+    return addSub(path.split('/')[0], function () {
+      return request('GET', '/api/doc/' + path).then(function (res) {
         var json = JSON.stringify(res);
         if (json !== lastJSON) {
           lastJSON = json;
@@ -136,12 +206,8 @@
         }
       }).catch(function (err) {
         if (onError) onError(err);
-      }).then(function () {
-        if (!stopped) setTimeout(poll, POLL_MS);
       });
-    }
-    poll();
-    return function unsubscribe() { stopped = true; };
+    });
   };
 
   /* -------------------- Db -------------------- */

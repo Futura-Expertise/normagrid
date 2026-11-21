@@ -22,7 +22,7 @@ try:
 except ImportError:  # psycopg2 n'est necessaire qu'en hebergement cloud
     psycopg2 = None
 
-APP_VERSION = "V4.1"  # source unique : voir app.py, qui l'importe d'ici.
+APP_VERSION = "V4.2"  # source unique : voir app.py, qui l'importe d'ici.
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -140,7 +140,8 @@ def is_postgres():
 
 
 def get_connection():
-    conn = sqlite3.connect(get_db_path(), timeout=30)
+    from backend.changes import TrackedConnection
+    conn = sqlite3.connect(get_db_path(), timeout=30, factory=TrackedConnection)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn

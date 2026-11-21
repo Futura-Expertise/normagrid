@@ -227,6 +227,7 @@ SECTION_BY_PREFIX = {
 # ecriture en base (l'ecriture effective passe ensuite par les routes
 # generiques /api/doc, deja protegees par section ci-dessus).
 LOGIN_ONLY_EXACT_PATHS = {
+    "/api/events",   # V4.2 : flux SSE des modifications (voir backend/changes.py)
     "/api/excel/parse",
     # Import du registre des livrables depuis un classeur Excel reel
     # (V1.66) : meme principe que /api/excel/parse ci-dessus - lecture

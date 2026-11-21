@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 from backend.db import init_db, APP_VERSION, get_secret_key, is_postgres
 from backend.routes.api import api
@@ -62,6 +62,16 @@ app.register_blueprint(modules_bp)
 # pour le detail de la politique (une seule porte d'entree, plus facile a
 # auditer que des controles disperses dans chaque fichier de routes).
 app.before_request(accessmod.enforce_request)
+
+
+@app.after_request
+def _notifier_changement_base(resp):
+    """V4.2 : restauration / changement / adoption de base (routes /api/db/*) : les donnees
+    affichees changent en bloc, on previent donc tous les navigateurs connectes."""
+    if request.path.startswith("/api/db/") and request.method != "GET" and resp.status_code < 400:
+        from backend import changes
+        changes.bump_all()
+    return resp
 
 
 @app.get("/")

@@ -2518,3 +2518,18 @@ Dès que le contrat/devis et les colonnes désignation, code et indice sont choi
 - La V3.54 (droits d'accès par profil) est renommée **V4.1** ; contenu inchangé. La V3.55 (périmètre par projet, masquage des montants) est reportée.
 - Récupération d'une ancienne base (assistant de premier démarrage) : boutons de filtre **V2 / V3 / V4** (avec le nombre de bases) au-dessus de la liste ; le clic affiche toutes les bases de cette version majeure, la plus récente d'abord ; la plus haute version présente est sélectionnée par défaut.
 - Reprise automatique au premier lancement : la base précédente la plus récente parmi les versions V3 à V9 est copiée sous le nom de la nouvelle version (avant : V3 uniquement).
+
+## V4.2 — Fin du polling : le serveur ne sollicite le navigateur que lorsqu'une donnée change
+
+**Avant :** chaque collection (environ 39) était relue toutes les 2 secondes, en permanence, même sans action de l'utilisateur.
+
+**Maintenant :**
+- `backend/changes.py` : chaque connexion à la base détecte les tables réellement modifiées et, au commit, publie les collections concernées (toutes les écritures sont détectées : routes génériques, imports, étude électrique, factures…). Une table inconnue déclenche par sécurité un rechargement complet.
+- `GET /api/events` (Server-Sent Events) : le navigateur y reste abonné ; le serveur n'envoie un message que lorsqu'il y a une modification, filtré selon les droits du profil.
+- `static/js/local-db.js` : à la réception, seules les collections citées sont relues (une seule requête, regroupée si plusieurs messages arrivent d'affilée).
+- Reconnexion automatique avec rattrapage ; repli sur un rafraîchissement toutes les 5 s uniquement pendant une coupure du flux (proxy, navigateur ancien).
+- Restauration / changement de base (`/api/db/*`) : tous les navigateurs sont prévenus.
+
+Mesures (base de 1 107 disjoncteurs) : 0 requête en 12 s d'inactivité ; une modification externe apparaît en ~150 ms avec 1 seule requête.
+
+Limite : l'état des notifications est en mémoire du processus serveur (un processus, plusieurs threads : lancement standard). Un déploiement multi-processus (gunicorn -w N) nécessiterait un relais commun (Redis ou table de versions).

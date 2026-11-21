@@ -11,9 +11,11 @@ toutes les collections, cote client comme cote serveur.
 import datetime
 import json
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, Response, g, jsonify, request
 
 from backend import auth as authmod
+from backend import access as accessmod
+from backend import changes
 from backend import db as dbmod
 from backend import store
 
@@ -188,3 +190,37 @@ def _split_path(doc_path):
 @api.errorhandler(ValueError)
 def handle_value_error(e):
     return jsonify({"error": str(e)}), 400
+
+
+@api.get("/events")
+def events():
+    """V4.2 : flux Server-Sent Events. Le serveur n'envoie un message que lorsqu'une modification
+    est commitee en base ; le navigateur recharge alors uniquement les collections citees.
+    Un commentaire de maintien de connexion est emis toutes les 20 s (pas une requete)."""
+    user = g.get("current_user")
+    role = (user or {}).get("role")
+
+    def lisible(coll):
+        section = accessmod.COLLECTION_SECTION.get(coll)
+        if section is None:
+            return role == "admin"
+        return accessmod.access_level(role, section) != "none"
+
+    def flux():
+        last = changes.current_seq()
+        yield "retry: 3000\n\n: ok\n\n"
+        while True:
+            seq, tout, colls = changes.wait_for(last, 20)
+            if seq == last:
+                yield ": ping\n\n"
+                continue
+            last = seq
+            if tout:
+                yield "data: " + json.dumps({"all": True}) + "\n\n"
+            else:
+                vis = sorted(c for c in colls if lisible(c))
+                if vis:
+                    yield "data: " + json.dumps({"c": vis}) + "\n\n"
+
+    return Response(flux(), mimetype="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
