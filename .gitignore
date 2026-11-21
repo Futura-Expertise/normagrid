@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# Configuration locale (contient la cle secrete Flask et le chemin de la base)
+db_location.json
+
+# Donnees locales : base SQLite, pieces jointes, factures, rapports de migration
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Environnements
+.venv/
+venv/
+.env

@@ -1,0 +1,16 @@
+# A installer EN PLUS de requirements.txt, uniquement sur le serveur
+# d'hebergement cloud qui fera tourner l'application avec une base
+# PostgreSQL (variable d'environnement DATABASE_URL definie) - voir
+# claude/architecture-cloud-securite.md.
+#
+# Ne pas installer ce fichier sur un poste local en usage normal (base
+# SQLite par defaut) : psycopg2-binary ne publie pas de wheel precompile
+# pour toutes les plateformes (notamment Windows sur processeur ARM64), et
+# sa compilation depuis les sources echoue sans les outils de developpement
+# PostgreSQL (pg_config) installes sur le poste - inutile de s'imposer
+# cette contrainte quand l'application tourne en local avec SQLite, qui ne
+# depend pas de ce paquet.
+#
+# Installation sur le serveur cloud :
+#   pip install -r requirements.txt -r requirements-postgres.txt
+psycopg2-binary==2.9.13

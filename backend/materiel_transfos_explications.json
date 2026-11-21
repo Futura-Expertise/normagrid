@@ -1,0 +1,176 @@
+{
+ "intro": "Sauf indication contraire, S = puissance ONAN (la liste suppose que uk, Pk et P0 sont donnés à la puissance ONAN). S en MVA, U en kV, courants en A, pertes en kW, impédances en ohms.",
+ "groupes": [
+  {
+   "groupe": "Identification",
+   "colonnes": [
+    {
+     "colonne": "id",
+     "signification": "Code unique de la ligne",
+     "calcul": "TR-<kV primaire>-<kV secondaire>-<MVA ONAN>, ex. TR-60-10-25"
+    },
+    {
+     "colonne": "tension_primaire_kV",
+     "signification": "Tension côté réseau HT",
+     "calcul": "Saisie (60 ou 225)"
+    },
+    {
+     "colonne": "tension_secondaire_kV",
+     "signification": "Tension côté distribution MT",
+     "calcul": "Saisie (10)"
+    },
+    {
+     "colonne": "serie_puissance",
+     "signification": "Origine de la valeur de puissance",
+     "calcul": "Texte : R10 selon IEC 60076-1 art. 5.1.2 jusqu'à 20 MVA ; R10 prolongée par l'usage au-delà ; hors R10 pour 35 et 45 MVA"
+    }
+   ]
+  },
+  {
+   "groupe": "Puissances",
+   "colonnes": [
+    {
+     "colonne": "S_onan_MVA",
+     "signification": "Puissance en refroidissement naturel (huile et air naturels)",
+     "calcul": "Saisie"
+    },
+    {
+     "colonne": "ONAF_applicable",
+     "signification": "Indique si le transformateur a une puissance ONAF (ventilateurs). OUI par défaut ; NON pour les transformateurs de distribution MT/BT, sans ventilation.",
+     "calcul": "Saisie OUI / NON. Si NON : S_onaf et les courants ONAF ne sont pas calculés (cellules grisées « — » à l'écran, vides dans Excel)."
+    },
+    {
+     "colonne": "S_onaf_MVA",
+     "signification": "Puissance avec ventilateurs (air forcé)",
+     "calcul": "ONAN × rapport, rapport = 1,25 (feuille Paramètres). Non applicable (vide) si ONAF_applicable = NON."
+    }
+   ]
+  },
+  {
+   "groupe": "Impédance et courant à vide",
+   "colonnes": [
+    {
+     "colonne": "uk_pct",
+     "signification": "Tension de court-circuit : part de la tension nominale à appliquer au primaire pour faire circuler le courant nominal secondaire en court-circuit ; elle donne l'impédance interne",
+     "calcul": "Saisie (hypothèse par plage de puissance)"
+    },
+    {
+     "colonne": "I0_pct",
+     "signification": "Courant à vide en % du courant nominal (courant magnétisant)",
+     "calcul": "Paramètre (0,30 %)"
+    }
+   ]
+  },
+  {
+   "groupe": "Pertes",
+   "colonnes": [
+    {
+     "colonne": "Pk_kW (estimé)",
+     "signification": "Pertes en charge (cuivre des enroulements) à la puissance de référence",
+     "calcul": "Pk_ancrage × (S/S_ancrage)^0,85 ; ancrage 110 kW à 40 MVA ; × 1,10 pour 225 kV"
+    },
+    {
+     "colonne": "P0_kW (estimé)",
+     "signification": "Pertes à vide (fer du circuit magnétique), présentes dès la mise sous tension",
+     "calcul": "P0_ancrage × (S/S_ancrage)^0,70 ; ancrage 24 kW à 40 MVA ; × 1,10 pour 225 kV"
+    },
+    {
+     "colonne": "Pk_constructeur_kW / P0_constructeur_kW",
+     "signification": "Valeurs garanties à saisir quand elles sont connues",
+     "calcul": "Saisie, vide par défaut"
+    },
+    {
+     "colonne": "Pk_retenu_kW / P0_retenu_kW",
+     "signification": "Valeur utilisée dans les calculs",
+     "calcul": "Constructeur si renseigné, sinon estimé"
+    },
+    {
+     "colonne": "P0_max_kW / Pk_max_kW",
+     "signification": "Valeur maximale garantie avec tolérance",
+     "calcul": "Valeur retenue × 1,15 (IEC 60076-1, Tableau 1, +15 % par perte). La limite de +10 % sur les pertes totales n'est pas appliquée ici."
+    }
+   ]
+  },
+  {
+   "groupe": "Courants nominaux",
+   "colonnes": [
+    {
+     "colonne": "I_prim_ONAN_A",
+     "signification": "Courant nominal primaire (HT), puissance ONAN",
+     "calcul": "S_onan × 1000 / (√3 × U_prim)"
+    },
+    {
+     "colonne": "I_prim_ONAF_A",
+     "signification": "Courant nominal primaire (HT), puissance ONAF",
+     "calcul": "S_onaf × 1000 / (√3 × U_prim)"
+    },
+    {
+     "colonne": "I_sec_ONAN_A",
+     "signification": "Courant nominal secondaire (MT), puissance ONAN",
+     "calcul": "S_onan × 1000 / (√3 × U_sec)"
+    },
+    {
+     "colonne": "I_sec_ONAF_A",
+     "signification": "Courant nominal secondaire (MT), puissance ONAF",
+     "calcul": "S_onaf × 1000 / (√3 × U_sec)"
+    }
+   ]
+  },
+  {
+   "groupe": "Décomposition de l'impédance",
+   "colonnes": [
+    {
+     "colonne": "ur_pct",
+     "signification": "Composante résistive de uk, due aux pertes en charge",
+     "calcul": "Pk / (S × 10), Pk en kW, S en MVA"
+    },
+    {
+     "colonne": "ux_pct",
+     "signification": "Composante réactive de uk, due au flux de fuite",
+     "calcul": "√(uk² − ur²)"
+    },
+    {
+     "colonne": "Z_sec_ohm",
+     "signification": "Impédance du transformateur vue du côté MT",
+     "calcul": "uk/100 × U_sec² / S"
+    }
+   ]
+  },
+  {
+   "groupe": "Court-circuit",
+   "colonnes": [
+    {
+     "colonne": "pouvoir_cc_infini_MVA",
+     "signification": "Puissance de court-circuit à la barre MT, réseau amont supposé de puissance infinie",
+     "calcul": "S / (uk/100)"
+    },
+    {
+     "colonne": "Ik_infini_sec_kA",
+     "signification": "Courant de court-circuit correspondant côté MT",
+     "calcul": "pouvoir_cc / (√3 × U_sec). Majorant : le réseau réel a une impédance qui réduit ce courant (à traiter dans la feuille de court-circuit prévue ensuite)."
+    }
+   ]
+  },
+  {
+   "groupe": "Autres",
+   "colonnes": [
+    {
+     "colonne": "couplage",
+     "signification": "Groupe de couplage des enroulements (Dyn11, YNd11…)",
+     "calcul": "Non défini à ce stade"
+    },
+    {
+     "colonne": "statut",
+     "signification": "Niveau de confiance de la ligne",
+     "calcul": "« estimé » par défaut ; à passer à « constructeur » ou « ONEE » quand les valeurs sont remplacées"
+    },
+    {
+     "colonne": "source / hypothèse",
+     "signification": "Origine des valeurs",
+     "calcul": "Texte renvoyant aux feuilles Paramètres et Sources"
+    }
+   ]
+  }
+ ],
+ "note": "Les valeurs uk, Pk, P0 et I0 sont des estimations d'avant-projet ; seules les tolérances IEC (+15 % par perte) et les relations de calcul proviennent de normes."
+}

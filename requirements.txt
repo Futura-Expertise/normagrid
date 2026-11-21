@@ -1,0 +1,32 @@
+Flask==3.0.3
+pywebview==6.2.1
+pdfplumber==0.11.4
+openpyxl==3.1.5
+xlrd==2.0.1
+# xlrd : lecture des exports Caneco au format .xls ancien (V3.15, Etude electrique > Calcul > Importer note Caneco).
+# Epingle explicitement : pdfminer.six (utilise par pdfplumber) depend de
+# cryptography>=36.0.0, et les versions de cryptography posterieures a
+# 46.0.3 ne publient plus de wheel precompile pour Windows sur processeur
+# ARM64 (Copilot+ PC, etc.) - pip tente alors de la compiler depuis les
+# sources avec Rust + le linker MSVC, absent sur la plupart des postes, et
+# l'installation echoue. La 46.0.3 est la derniere a fournir ce wheel.
+cryptography==46.0.3
+pytesseract==0.3.13
+# pytesseract n'est qu'un connecteur Python : il appelle le programme
+# "Tesseract OCR", qui doit etre installe separement (pas via pip) pour que
+# la reconnaissance des factures scannees/photographiees fonctionne. Voir le
+# README, section "Module Factures fournisseurs".
+pypdf==6.17.0
+# pypdf : utilise pour decouper un PDF en fichiers separes lorsqu'un meme
+# fichier importe regroupe plusieurs factures distinctes (une par page ou
+# groupe de pages) - voir backend/routes/facture_fournisseur.py.
+#
+# psycopg2-binary (hebergement cloud / PostgreSQL, V1.55) n'est PAS dans ce
+# fichier : voir requirements-postgres.txt. Il ne publie pas de wheel
+# precompile pour toutes les plateformes (notamment Windows sur processeur
+# ARM64, meme probleme que cryptography ci-dessus) ; l'imposer ici ferait
+# echouer l'installation locale normale (SQLite, l'usage par defaut) sur ces
+# postes, alors que ce paquet ne sert qu'au mode cloud optionnel.
+pypdfium2==4.30.0
+# pypdfium2 : affichage d'une page de PDF en image (V3.45, numerisation des courbes de declenchement dans Etude electrique > fiches
+# techniques). Wheel precompile pour Windows / macOS / Linux, sans dependance systeme.

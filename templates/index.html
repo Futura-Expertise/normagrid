@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chantier ERP - {{ version }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ version }}">
+</head>
+<body>
+
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toasts"></div>
+<div id="print-area"></div>
+
+<script>window.APP_VERSION = "{{ version }}";</script>
+<script src="{{ url_for('static', filename='js/local-db.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/excel-listes.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-electrique.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-liste.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-bilan.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-materiel.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-protections.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-cables.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-calcul.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-unifilaire.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-mat-docs.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-mat-fiches.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-courbes.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-prot-fiche.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-symboles.js') }}?v={{ version }}"></script>
+<script src="{{ url_for('static', filename='js/etude-caneco.js') }}?v={{ version }}"></script>
+</body>
+</html>

@@ -1,0 +1,433 @@
+:root{color-scheme:light}
+body{margin:0;padding:0;}
+img{max-width:100%}
+[hidden]:not([hidden=until-found i]){display:none!important}
+  :root{
+    --bg:#f1f3f2; --surface:#ffffff; --surface-2:#e8ebe8; --surface-3:#dfe3e0;
+    --ink:#171f28; --ink-soft:#4c5766; --ink-faint:#8c96a3;
+    --border:#dbe0dd; --border-strong:#c2c9c5;
+    --primary:#1f4e79; --primary-ink:#ffffff; --primary-soft:#e6edf4; --primary-strong:#163a5c;
+    --accent:#c1650a; --accent-ink:#ffffff; --accent-soft:#fbeddb;
+    --success:#2f7d5a; --success-soft:#e3f2ea;
+    --warning:#b3690a; --warning-soft:#fbeedb;
+    --danger:#b3261e; --danger-soft:#fae6e4;
+    --shadow-sm:0 1px 2px rgba(23,31,40,.07);
+    --shadow-md:0 4px 16px rgba(23,31,40,.09);
+    --radius:8px;
+    --font-sans:'IBM Plex Sans',-apple-system,'Segoe UI',system-ui,sans-serif;
+    --font-mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10151c; --surface:#161d26; --surface-2:#1d2530; --surface-3:#26303c;
+      --ink:#e7ecf1; --ink-soft:#aeb9c6; --ink-faint:#727f8d;
+      --border:#293440; --border-strong:#3a4753;
+      --primary:#6fa3d6; --primary-ink:#0b1520; --primary-soft:#1c2b3b; --primary-strong:#8fbae3;
+      --accent:#eba64e; --accent-ink:#231402; --accent-soft:#2c2313;
+      --success:#5ab98a; --success-soft:#152922;
+      --warning:#e0a752; --warning-soft:#2a2213;
+      --danger:#e2716a; --danger-soft:#2b1a19;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+      --shadow-md:0 8px 24px rgba(0,0,0,.4);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10151c; --surface:#161d26; --surface-2:#1d2530; --surface-3:#26303c;
+    --ink:#e7ecf1; --ink-soft:#aeb9c6; --ink-faint:#727f8d;
+    --border:#293440; --border-strong:#3a4753;
+    --primary:#6fa3d6; --primary-ink:#0b1520; --primary-soft:#1c2b3b; --primary-strong:#8fbae3;
+    --accent:#eba64e; --accent-ink:#231402; --accent-soft:#2c2313;
+    --success:#5ab98a; --success-soft:#152922;
+    --warning:#e0a752; --warning-soft:#2a2213;
+    --danger:#e2716a; --danger-soft:#2b1a19;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+    --shadow-md:0 8px 24px rgba(0,0,0,.4);
+    color-scheme: dark;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font-sans);
+    font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-sans); font-weight:600; margin:0; text-wrap:balance;}
+  .num{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+  a{color:var(--primary);}
+  button{font-family:inherit; font-size:inherit;}
+  ::selection{background:var(--primary-soft);}
+
+  /* ---------- shell ---------- */
+  #app{display:flex; min-height:100vh;}
+  .sidebar{
+    width:232px; flex:0 0 auto; background:var(--surface); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; padding:18px 12px; gap:18px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; padding:2px 8px;}
+  .brand-mark{
+    width:34px; height:34px; border-radius:7px; background:var(--primary); color:var(--primary-ink);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+  }
+  .brand-text{display:flex; flex-direction:column; line-height:1.2; min-width:0;}
+  .brand-text b{font-size:14.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .brand-text span{font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em;}
+  nav.mainnav{display:flex; flex-direction:column; gap:2px;}
+  .navlink{
+    display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:7px; color:#017E84;
+    text-decoration:none; cursor:pointer; border:1px solid transparent; font-size:14.5px; font-weight:700;
+    text-transform:none; letter-spacing:normal;
+  }
+  .navlink svg{flex:0 0 auto; opacity:.85;}
+  .navlink:hover{background:var(--surface-2); color:#017E84;}
+  .navlink.active{background:var(--primary-soft); color:#017E84; border-color:transparent;}
+  .navlink.active svg{opacity:1;}
+  /* V1.74 : regroupement visuel du menu par module metier - voir
+     static/js/app.js, NAV_GROUPS/renderShell(). */
+  /* V1.77 : couleurs/tailles des noms de module et des sous-menus alignees
+     sur une charte fournie par l'utilisateur (capture d'ecran) - violet
+     #714B67 pour les noms de module (.nav-group-header), sarcelle #017E84
+     pour les sous-menus (.navlink). V1.78 : tailles ajustees a la demande
+     de l'utilisateur pour reprendre exactement les proportions deja en
+     place dans le bloc marque (.brand-text b/span) - grand titre (comme le
+     nom de societe, ex. "Futura") pour le nom de module, sous-titre (comme
+     "GESTION BTP") pour les sous-menus - le 24px/12px initial du V1.77
+     faisait passer certains noms de module sur deux lignes. V1.80 : a la
+     demande de l'utilisateur, les sous-menus (et les liens seuls du bas de
+     menu) reprennent desormais la meme police que les titres de module
+     (14.5px, gras, casse normale) au lieu du style "sous-titre" du V1.78 -
+     seule leur couleur sarcelle/verte (#017E84) est conservee pour les
+     distinguer des titres violets. Un petit retrait supplementaire
+     (padding-left de .nav-group-items, 6px -> 20px) marque la hierarchie
+     visuelle entre le titre de module et ses sous-menus, polices
+     desormais identiques. */
+  .nav-group{display:flex; flex-direction:column; gap:2px;}
+  .nav-group-header{
+    display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:7px;
+    background:none; border:none; color:#714B67; font-size:14.5px; font-weight:700;
+    text-transform:none; letter-spacing:normal; cursor:pointer; text-align:left; width:100%;
+  }
+  .nav-group-header:hover{background:var(--surface-2); color:#714B67;}
+  .nav-group-header svg{flex:0 0 auto; opacity:1;}
+  .nav-group-items{display:flex; flex-direction:column; gap:2px; padding-left:20px;}
+  /* V1.81 : a la demande de l'utilisateur, les sous-menus a l'interieur
+     d'un module (dans .nav-group-items) perdent le gras pour se distinguer
+     du titre du module au-dessus - seuls les liens seuls du bas de menu
+     (Tableau de bord, Backlog, Parametres), qui ne sont pas dans un groupe,
+     restent en gras comme les titres de module (regle .navlink de base,
+     inchangee). Taille/couleur identiques des deux cotes. V1.83 : le poids
+     500 du V1.81 restait visuellement proche du gras (700) de la regle de
+     base qu'il est cense remplacer - corrige a 400 (normal), y compris
+     pour l'etat actif (.navlink.active, meme specificite CSS que cette
+     regle mais placee avant elle dans la feuille, donc deja ecrasee ; la
+     precision ci-dessous la rend explicite pour eviter toute ambiguite si
+     ces regles sont un jour reordonnees). */
+  .nav-group-items .navlink{font-weight:400;}
+  .nav-group-items .navlink.active{font-weight:400;}
+  .navspacer{flex:1;}
+  .sidebar-foot{border-top:1px solid var(--border); padding-top:12px; display:flex; flex-direction:column; gap:8px;}
+  .profile-chip{display:flex; align-items:center; gap:9px; padding:6px 8px; border-radius:7px;}
+  .avatar{
+    width:30px; height:30px; border-radius:50%; background:var(--accent); color:var(--accent-ink);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12.5px; flex:0 0 auto;
+  }
+  .profile-meta{min-width:0;}
+  .profile-meta b{display:block; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .profile-meta span{font-size:11px; color:var(--ink-faint);}
+  .linklike{background:none; border:none; color:var(--ink-faint); font-size:12px; cursor:pointer; text-align:left; padding:4px 8px;}
+  .linklike:hover{color:var(--primary);}
+
+  .main{flex:1; min-width:0; display:flex; flex-direction:column;}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    padding:14px 24px; border-bottom:1px solid var(--border); background:var(--surface);
+    position:sticky; top:0; z-index:5;
+  }
+  .topbar h1{font-size:18px;}
+  .topbar-sub{font-size:12.5px; color:var(--ink-faint); margin-top:1px;}
+  .topbar-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .content{padding:22px 24px 60px; flex:1; min-width:0;}
+  .hamburger{display:none;}
+
+  /* ---------- buttons / inputs ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:7px;
+    border:1px solid var(--border-strong); background:var(--surface); color:var(--ink); cursor:pointer;
+    font-weight:500; font-size:13.5px; white-space:nowrap; transition:background .12s,border-color .12s;
+  }
+  .btn:hover{background:var(--surface-2);}
+  .btn:focus-visible{outline:2px solid var(--primary); outline-offset:1px;}
+  .btn-primary{background:var(--primary); border-color:var(--primary); color:var(--primary-ink);}
+  .btn-primary:hover{background:var(--primary-strong); border-color:var(--primary-strong);}
+  .btn-accent{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+  .btn-accent:hover{filter:brightness(.94);}
+  .btn-ghost{background:transparent; border-color:transparent;}
+  .btn-ghost:hover{background:var(--surface-2);}
+  .btn-danger{color:var(--danger); border-color:var(--danger);}
+  .btn-danger:hover{background:var(--danger-soft);}
+  .btn-sm{padding:5px 10px; font-size:12.5px; border-radius:6px;}
+  .btn[disabled]{opacity:.45; cursor:not-allowed;}
+  .iconbtn{
+    display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px;
+    border-radius:6px; border:1px solid transparent; background:transparent; color:var(--ink-soft); cursor:pointer;
+  }
+  .iconbtn:hover{background:var(--surface-2); color:var(--ink);}
+
+  label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px;}
+  input,select,textarea{
+    width:100%; padding:8px 10px; border-radius:6px; border:1px solid var(--border-strong);
+    background:var(--surface); color:var(--ink); font-family:inherit; font-size:13.5px;
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--primary); outline-offset:0; border-color:var(--primary);}
+  textarea{resize:vertical; min-height:60px;}
+  .field{margin-bottom:14px;}
+  .field-row{display:grid; gap:12px;}
+  .field-row > *{min-width:0;}
+  .grid-2{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:1fr 1fr 1fr;}
+  .grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+  .hint{font-size:11.5px; color:var(--ink-faint); margin-top:4px;}
+  fieldset{border:1px solid var(--border); border-radius:8px; padding:14px; margin:0 0 14px;}
+  legend{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); padding:0 6px;}
+
+  /* ---------- cards / kpi ---------- */
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-sm); min-width:0;}
+  .card-pad{padding:18px;}
+  .kpi-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px;}
+  .kpi-grid > *{min-width:0;}
+  .kpi{padding:16px 18px; display:flex; flex-direction:column; gap:6px;}
+  .kpi-label{font-size:12px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em; font-weight:600;}
+  .kpi-value{font-size:24px; font-weight:700; font-family:var(--font-mono);}
+  .kpi-sub{font-size:12px; color:var(--ink-soft);}
+  .kpi-accent{border-left:3px solid var(--primary);}
+  .kpi-accent.warn{border-left-color:var(--warning);}
+  .kpi-accent.danger{border-left-color:var(--danger);}
+  .kpi-accent.ok{border-left-color:var(--success);}
+
+  .section-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
+  .section-head h2{font-size:16px;}
+  .toolbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .toolbar input[type="search"],.toolbar input[type="text"]{width:220px;}
+  .toolbar select{width:auto;}
+
+  /* ---------- table ---------- */
+  .table-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface);}
+  .table-wrap table{width:100%; border-collapse:collapse; font-size:13px; min-width:640px;}
+  thead th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint);
+    font-weight:700; padding:10px 12px; border-bottom:1px solid var(--border); background:var(--surface-2); white-space:nowrap;
+  }
+  tbody td{padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-2);}
+  /* V2.10 : en-tetes de colonne cliquables pour le tri croissant/
+     decroissant (Devis, Commande client, Contrat) - voir sortThHtml()/
+     wireSortHeaders() dans app.js. */
+  th.th-sortable{transition:color .12s;}
+  th.th-sortable:hover{color:var(--ink);}
+  th.th-sortable.sort-active{color:var(--accent, var(--ink));}
+  .sort-arrow{font-size:9px; display:inline-block; margin-left:2px;}
+  td.r,th.r{text-align:right;}
+  td.c,th.c{text-align:center;}
+  tr.row-warn td{background:var(--warning-soft);}
+  tfoot td{padding:10px 12px; border-top:2px solid var(--border); background:var(--surface-2);}
+  .row-actions{display:flex; gap:4px; justify-content:flex-end;}
+  .empty-state{padding:44px 20px; text-align:center; color:var(--ink-faint);}
+  .empty-state svg{opacity:.5; margin-bottom:10px;}
+  .empty-state p{margin:4px 0 14px;}
+  .muted{color:var(--ink-faint);}
+
+  /* ---------- pills ---------- */
+  .pill{
+    display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:20px;
+    font-size:11.5px; font-weight:600; white-space:nowrap;
+  }
+  .pill::before{content:''; width:6px; height:6px; border-radius:50%; background:currentColor;}
+  .pill-neutral{background:var(--surface-3); color:var(--ink-soft);}
+  .pill-primary{background:var(--primary-soft); color:var(--primary-strong);}
+  .pill-success{background:var(--success-soft); color:var(--success);}
+  .pill-warning{background:var(--warning-soft); color:var(--warning);}
+  .pill-danger{background:var(--danger-soft); color:var(--danger);}
+  .pill-accent{background:var(--accent-soft); color:var(--accent);}
+
+  /* ---------- lines editor ---------- */
+  .lines-table input{padding:6px 8px; font-size:13px;}
+  .lines-table textarea{padding:6px 8px; font-size:13px; resize:vertical; min-height:34px; font-family:inherit; width:100%; box-sizing:border-box;}
+  .lines-table td{padding:5px 6px;}
+  .lines-total{display:flex; justify-content:flex-end; margin-top:12px;}
+  .totals-box{min-width:280px; font-size:13.5px;}
+  .totals-row{display:flex; justify-content:space-between; padding:5px 2px;}
+  .totals-row.grand{border-top:1px solid var(--border-strong); margin-top:4px; padding-top:9px; font-weight:700; font-size:15px;}
+  .totals-row .num{font-family:var(--font-mono);}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(15,20,26,.5); display:flex; align-items:flex-start;
+    justify-content:center; padding:5vh 16px; z-index:100; overflow-y:auto;
+  }
+  .modal{
+    background:var(--surface); border-radius:12px; box-shadow:var(--shadow-md); width:100%; max-width:720px;
+    margin:auto; border:1px solid var(--border);
+  }
+  .modal-lg{max-width:920px;}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border);}
+  .modal-head h3{font-size:16px;}
+  .modal-body{padding:20px; max-height:72vh; overflow-y:auto;}
+  .modal-foot{display:flex; justify-content:flex-end; gap:10px; padding:14px 20px; border-top:1px solid var(--border);}
+  .confirm-modal .modal-body{font-size:14px;}
+
+  /* ---------- navigateur de dossiers/fichiers (V1.41) ---------- */
+  .nf-liste{display:flex; flex-direction:column; gap:4px; max-height:46vh; overflow-y:auto;}
+  .nf-item{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:8px 10px;
+    border:1px solid transparent; border-radius:8px; background:none; cursor:pointer; font-size:13.5px;
+    color:var(--ink);
+  }
+  .nf-item:hover{background:var(--surface-3); border-color:var(--border);}
+  .nf-item svg{flex:0 0 auto; color:var(--ink-faint);}
+  .nf-item-fichier{color:var(--primary-strong);}
+  .nf-item-fichier svg{color:var(--primary-strong);}
+  .nf-chemin{font-size:12px; color:var(--ink-faint); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+  /* ---------- toast ---------- */
+  #toasts{position:fixed; bottom:18px; right:18px; display:flex; flex-direction:column; gap:8px; z-index:200;}
+  .toast{
+    padding:11px 16px; border-radius:8px; background:var(--ink); color:var(--bg); font-size:13px;
+    box-shadow:var(--shadow-md); max-width:320px; display:flex; align-items:center; gap:8px;
+  }
+  .toast.success{background:var(--success);}
+  .toast.danger{background:var(--danger);}
+
+  /* ---------- profile picker ---------- */
+  .picker-screen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:var(--bg);}
+  .picker-card{width:100%; max-width:420px;}
+  .picker-users{display:flex; flex-direction:column; gap:8px; margin-top:16px;}
+  .picker-user{
+    display:flex; align-items:center; gap:12px; padding:11px 13px; border-radius:8px; border:1px solid var(--border);
+    cursor:pointer; background:var(--surface); text-align:left; width:100%;
+  }
+  .picker-user:hover{border-color:var(--primary); background:var(--primary-soft);}
+
+  /* ---------- print ---------- */
+  #print-area{display:none;}
+  .print-doc{font-family:var(--font-sans); color:#111; background:#fff; padding:18px 20px; --pblue:#1a5c96; box-sizing:border-box; min-height:269mm;
+    --pfont-arial:Arial,'Helvetica Neue',Helvetica,sans-serif; --pfont-calibri:Calibri,Candara,'Segoe UI',Optima,sans-serif;}
+
+  /* -- en-tete : logo + mentions legales (gauche) / date + titre + numero (droite) --
+     Polices et tailles calees sur le modele fourni par l'utilisateur : Arial 11 pour
+     les mentions legales/date/reference/tableau, Calibri 36 pour le titre du document,
+     Arial 14 pour le numero et le bloc client. */
+  .print-head{display:flex; justify-content:space-between; align-items:flex-start; gap:24px;}
+  .print-head-left{max-width:62%;}
+  .print-logo{margin-bottom:8px;}
+  .print-logo-img{max-height:52px; max-width:220px; display:block;}
+  .print-logo-text{font-size:19px; font-weight:700; color:var(--pblue);}
+  .print-legal{font-family:var(--pfont-arial); font-size:11pt; color:#222; line-height:1.55;}
+  .print-legal div{margin:0;}
+  .print-head-right{text-align:right; min-width:220px;}
+  .print-date{font-family:var(--pfont-arial); font-size:11pt; color:#222; margin-bottom:10px;}
+  .print-date b{color:var(--pblue);}
+  .print-doctitle{font-family:var(--pfont-calibri); font-size:36pt; font-weight:700; color:var(--pblue); text-transform:uppercase; letter-spacing:.02em; margin-bottom:6px;}
+  .print-docnum{font-family:var(--pfont-arial); font-size:14pt; color:#222;}
+  .print-docnum b{color:var(--pblue);}
+  .print-docrev{font-family:var(--pfont-arial); font-size:11.5px; color:#222; font-weight:700; margin-top:1px;}
+
+  /* -- reference (colonne gauche, sous les mentions legales) / bloc client
+     avec adresse (colonne droite, sous le numero) -- integres directement
+     dans l'en-tete (plus de ligne separee), suivis d'un filet horizontal. */
+  .print-ref{font-family:var(--pfont-arial); font-size:11pt; color:#222; margin-top:12px;}
+  .print-ref .lbl{color:#222;}
+  .print-ref .val{color:var(--pblue); font-weight:700;}
+  .print-client{font-family:var(--pfont-arial); font-size:14pt; color:#222; text-align:right; margin-top:12px;}
+  .print-client .lbl{color:#222;}
+  .print-client .val{color:var(--pblue); font-weight:700;}
+  .print-client div{margin-bottom:2px;}
+  .print-head-sep{border-top:1px solid #ccc; margin:14px 0 18px;}
+
+  /* -- tableau des lignes -- */
+  .print-doc table{width:100%; border-collapse:collapse; font-family:var(--pfont-arial); font-size:11pt; table-layout:fixed;}
+  .print-doc th{background:#eef0f2; text-align:center; padding:8px 8px; border:1px solid #999; font-size:10.5px; font-weight:700; text-transform:none; letter-spacing:normal; white-space:normal; color:#111; word-wrap:break-word;}
+  .print-doc td{padding:9px 9px; border:1px solid #bbb; vertical-align:top; text-align:center; word-wrap:break-word; overflow-wrap:break-word;}
+  .print-doc td:nth-child(3){text-align:left;}
+  .print-doc .lig-titre{font-weight:700;}
+  .print-doc .lig-sub{font-size:11px; color:#333; margin-top:2px;}
+
+  /* -- documents non itemises (Contrat, Avenant) : bloc cle/valeur -- */
+  .print-info-table{margin-top:6px;}
+  .print-info-table td{text-align:left; padding:10px 12px;}
+  .print-info-table td.lbl{font-weight:700; background:#f4f5f6; width:32%;}
+
+  /* -- conditions (gauche) + totaux (droite) -- */
+  .print-bottom{display:flex; justify-content:space-between; align-items:flex-start; gap:24px; margin-top:16px;}
+  .print-conditions{font-size:11.5px; color:#666; max-width:55%;}
+  .print-conditions .cond-title{margin-bottom:4px;}
+  .print-conditions .cond-body div{margin-bottom:2px;}
+  .print-totals table{width:100%; border-collapse:collapse; font-size:12.5px; table-layout:fixed;}
+  .print-totals td{border:1px solid #333; padding:6px 10px; text-align:left; vertical-align:middle; overflow-wrap:normal; word-break:normal;}
+  .print-totals td:first-child{font-weight:700;}
+  .print-totals td:last-child{text-align:right;}
+  .print-totals tr.tot-first td, .print-totals tr.tot-last td{font-weight:700;}
+
+  @media print{
+    /* #app (visibility:hidden seul, comme avant) reste dans le flux normal
+       du document et sa hauteur (celle du viewport ecran, ex. 100vh) peut
+       depasser la hauteur imprimable d'une page A4 ; le moteur d'impression
+       reserve alors des pages supplementaires (vides) pour couvrir cette
+       hauteur invisible, meme quand le contenu imprime tient sur une seule
+       page. #app et #toasts sont donc retires du flux avec display:none
+       plutot que rendus juste invisibles, pour qu'ils ne comptent plus du
+       tout dans la pagination. */
+    #app, #modal-root, #toasts{display:none;}
+    #print-area{display:block; width:100%;}
+    @page{margin:14mm;}
+  }
+
+  @media (max-width:820px){
+    #app{flex-direction:column;}
+    .sidebar{
+      width:100%; flex-direction:row; align-items:center; padding:10px 12px; overflow-x:auto; gap:10px;
+      border-right:none; border-bottom:1px solid var(--border);
+    }
+    .brand{flex:0 0 auto;}
+    nav.mainnav{flex-direction:row;}
+    .navlink span{display:none;}
+    .navlink{padding:8px;}
+    .navspacer{display:none;}
+    /* En largeur reduite, le menu redevient une seule rangee horizontale
+       d'icones (comportement d'avant la V1.74) : les en-tetes de groupe
+       et le repli/depli n'ont pas de sens dans ce format, donc on les
+       neutralise plutot que de les adapter - tous les items restent
+       directement accessibles, juste sans le regroupement visuel. */
+    .nav-group,.nav-group-items{display:contents;}
+    .nav-group-header{display:none;}
+    .sidebar-foot{flex-direction:row; border-top:none; padding-top:0; margin-left:auto;}
+    .profile-meta{display:none;}
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+    .content{padding:16px 14px 50px;}
+    .topbar{padding:12px 14px;}
+    .field-row.grid-2,.field-row.grid-3,.field-row.grid-4{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:460px){
+    .kpi-grid{grid-template-columns:1fr;}
+    .field-row.grid-2,.field-row.grid-3,.field-row.grid-4{grid-template-columns:1fr;}
+    .modal-body{padding:14px;}
+    .toolbar input[type="search"],.toolbar input[type="text"]{width:100%;}
+  }
+
+/* ---------- Export / import Excel avec listes (V2.16) ---------- */
+.xl-sum{display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 8px;}
+.xl-tabs{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+.xl-tab{border:1px solid var(--border-strong); background:var(--surface); color:var(--ink); border-radius:20px; padding:4px 12px; font-size:12.5px; cursor:pointer;}
+.xl-tab.active{background:var(--primary-soft); border-color:var(--primary); font-weight:600;}
+.xl-table td{vertical-align:top;}
+.xl-row-add td{background:var(--success-soft);}
+.xl-row-mod td{background:var(--warning-soft);}
+.xl-row-err td{background:var(--danger-soft);}
+.xl-row-same td{color:var(--ink-faint);}
+.xl-chip{display:inline-block; padding:2px 8px; border-radius:6px; font-size:11.5px; margin:2px 4px 2px 0; border:1px solid var(--border-strong); background:var(--surface); color:var(--ink);}
+.xl-chip-add{border-color:var(--success);}
+.xl-chip-mod{border-color:var(--warning);}
+.xl-chip-err{border-color:var(--danger); background:var(--danger-soft); color:var(--danger); font-weight:600;}
+.xl-chip-warn{border-color:var(--warning); color:var(--warning);}
+.xl-chip-del{border-color:var(--danger); color:var(--danger); text-decoration:line-through;}
+.xl-chip-new{border-color:var(--success); background:var(--success-soft);}
